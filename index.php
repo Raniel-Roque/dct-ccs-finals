@@ -1,8 +1,18 @@
 <?php
-    $con = mysqli_connect("localhost", "root", "", "dct-ccs-finals");
+    require('functions.php');
 
-    if($con === false) {
-        die("ERROR: Could not connect " . mysqli_connect_error());
+    if (isset($_POST['login'])) {
+        $email = htmlspecialchars(stripslashes(trim($_POST['email'])));
+        $password = md5(htmlspecialchars(stripslashes(trim($_POST['password']))));
+
+        $arrErrors = validateLoginCredentials($email, $password);
+
+        if(checkLoginCredentials($email, $password)) {
+            $_SESSION['email'] = $email;
+            header("location: admin/dashboard.php");
+        } else if (empty($arrErrors)) {
+            $arrErrors[] = 'Invalid email or password';
+        }
     }
 ?>
 
