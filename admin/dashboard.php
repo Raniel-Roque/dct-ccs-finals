@@ -1,4 +1,16 @@
 <!-- Template Files here -->
+<?php
+    session_start();
+    $title = 'Dashboard';
+    $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
+    
+    require 'partials/header.php';
+    require 'partials/side-bar.php';
+    require '../functions.php';
+
+    guard();
+?>
+
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">    
     <h1 class="h2">Dashboard</h1>        
     
@@ -38,3 +50,4 @@
     </div>    
 </main>
 <!-- Template Files here -->
+ <?php require 'partials/footer.php'; ?>
