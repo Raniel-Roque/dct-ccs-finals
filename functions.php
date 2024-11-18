@@ -1,4 +1,21 @@
-<?php    
+<?php   
+    function getDatabaseConnection() {
+        $host = "localhost";
+        $username = "root";
+        $password = "";
+        $database = "dct-ccs-finals";
+
+        // Establish a connection to the database
+        $con = mysqli_connect($host, $username, $password, $database);
+
+        // Check the connection
+        if ($con === false) {
+            die("ERROR: Could not connect. " . mysqli_connect_error());
+        }
+
+        return $con;
+    }
+
     function validateLoginCredentials($email, $password) {
         $arrErrors = [];
         $email = htmlspecialchars(stripslashes(trim($email)));
