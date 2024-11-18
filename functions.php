@@ -1,9 +1,24 @@
-<?php    
-    function validateLoginCredentials($email, $password) {
+<?php   
+    function getDatabaseConnection() {
+        $host = "localhost";
+        $username = "root";
+        $password = "";
+        $database = "dct-ccs-finals";
+
+        // Establish a connection to the database
+        $con = mysqli_connect($host, $username, $password, $database);
+
+        // Check the connection
+        if ($con === false) {
+            die("ERROR: Could not connect. " . mysqli_connect_error());
+        }
+
+        return $con;
+    }
+
+    function validateLoginCredentials($email, $password) {    
         $arrErrors = [];
-        $email = htmlspecialchars(stripslashes(trim($email)));
-        $password = htmlspecialchars(stripslashes(trim($password)));
-    
+        
         if (empty($email)) {
             $arrErrors[] = 'Email is required.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -17,12 +32,29 @@
         return $arrErrors;
     }
     
-    function checkLoginCredentials($email, $password, $users) {
-        if (isset($users[$email]) && $users[$email] === $password) {
-            return true;
+    function checkLoginCredentials($email, $password) {
+        // Get database connection
+        $con = getDatabaseConnection();
+    
+        // Use prepared statements to prevent SQL injection
+        $stmt = $con->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
+        $stmt->bind_param("ss", $email, $password);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        // Check if a user was found
+        if ($result->num_rows > 0) {
+            $stmt->close();
+            mysqli_close($con);
+            return true; // Login successful
         }
-        return false; 
+    
+        // Close connections
+        $stmt->close();
+        mysqli_close($con);
+        return false; // Invalid credentials
     }
+    
 
     function checkUserSessionIsActive() {
         if (isset($_SESSION['email']) && isset($_SESSION['current_page'])) {
