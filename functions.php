@@ -16,11 +16,9 @@
         return $con;
     }
 
-    function validateLoginCredentials($email, $password) {
+    function validateLoginCredentials($email, $password) {    
         $arrErrors = [];
-        $email = $email;
-        $password = $password;
-    
+        
         if (empty($email)) {
             $arrErrors[] = 'Email is required.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
