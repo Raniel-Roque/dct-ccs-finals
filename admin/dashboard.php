@@ -4,6 +4,8 @@
     $title = 'Dashboard';
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
     
+    $pathLogout = "logout.php";
+    
     require 'partials/header.php';
     require 'partials/side-bar.php';
     require '../functions.php';

@@ -1,3 +1,6 @@
-<?php
-    // Logout Code Here
+<?php 
+    require '../functions.php';
+    session_start();
+    session_destroy();
+    header("Location: " . getBaseURL());
 ?>
