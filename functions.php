@@ -189,6 +189,26 @@
         return $arrErrors;
     }
 
+    function checkDuplicateSubjectDataForEdit($subject_code, $subject_name) {
+        $arrErrors = [];
+        $con = getDatabaseConnection();
+    
+        // Check if the subject name already exists for a different subject
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_name = ? AND subject_code != ?");
+        $stmt->bind_param("ss", $subject_name, $subject_code);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows > 0) {
+            $arrErrors[] = "Duplicate Subject Name.";
+        }
+    
+        $stmt->close();
+        mysqli_close($con);
+    
+        return $arrErrors;
+    }    
+
     function getSelectedSubjectIndex($subject_code) {
         foreach ($_SESSION['subjects'] as $index => $subject) {
             if ($subject['subject_code'] === $subject_code) {
