@@ -56,9 +56,6 @@
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">
-    <?php if (!empty($arrErrors)): ?>
-        <?= displayErrors($arrErrors); ?>
-    <?php endif; ?>
     <h1 class="h2">Edit Subject</h1>
     <div class="mt-5 mb-3 w-100">
         <nav aria-label="breadcrumb">
@@ -70,6 +67,10 @@
         </nav>
     </div>
 
+    <?php if (!empty($arrErrors)): ?>
+        <?= displayErrors($arrErrors); ?>
+    <?php endif; ?>
+    
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <div class="form-floating mb-3">
             <input type="number" class="form-control bg-light" id="txtSubjectCode" name="subject_code" value="<?= htmlspecialchars($subject['subject_code']); ?>" readonly>
