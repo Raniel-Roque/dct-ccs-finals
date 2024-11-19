@@ -103,38 +103,43 @@
     }
 
     // STUDENT MANAGEMENT
-
-    function validateStudentData($student_data) {
+    function validateStudentData($student_id, $first_name, $last_name) {
         $arrErrors = [];
-    
+
         // Validate Student ID
-        if (empty($student_data['student_id'])) {
+        if (empty($student_id)) {
             $arrErrors[] = "Student ID is required.";
         }
-    
+
         // Validate First Name
-        if (empty($student_data['first_name'])) {
+        if (empty($first_name)) {
             $arrErrors[] = "First name is required.";
         }
-    
+
         // Validate Last Name
-        if (empty($student_data['last_name'])) {
+        if (empty($last_name)) {
             $arrErrors[] = "Last name is required.";
         }
-    
+
         return $arrErrors;
     }
 
-    function checkDuplicateStudentData($student_data) {
+    function checkDuplicateStudentData($student_id) {
         $arrErrors = [];
+        $con = getDatabaseConnection();
 
-        // Check for duplicate student ID or name
-        foreach ($_SESSION['students'] as $student) {
-            if ($student['student_id'] === $student_data['student_id']) {
-                $arrErrors[] = "Duplicate Student ID.";
-                break;
-            }
+        // Check if the student ID already exists in the database
+        $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
+        $stmt->bind_param("s", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $arrErrors[] = "Duplicate Student ID.";
         }
+
+        $stmt->close();
+        mysqli_close($con);
 
         return $arrErrors;
     }

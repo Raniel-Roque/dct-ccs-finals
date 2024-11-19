@@ -14,6 +14,37 @@
 
     require '../partials/header.php';
     require '../partials/side-bar.php';
+
+    if (isset($_POST['btnRegister'])) {
+        $student_id = htmlspecialchars(stripslashes(trim($_POST['txtStudentID'])));
+        $first_name = htmlspecialchars(stripslashes(trim($_POST['txtFirstName'])));
+        $last_name = htmlspecialchars(stripslashes(trim($_POST['txtLastName'])));
+
+        $arrErrors = validateStudentData($student_id, $first_name, $last_name);
+        $duplicateErrors = checkDuplicateStudentData($student_id);
+        $arrErrors = array_merge($arrErrors, $duplicateErrors);
+
+        if (empty($arrErrors)) {
+            $con = getDatabaseConnection();
+            $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $student_id, $first_name, $last_name);
+            $stmt->execute();
+            $stmt->close();
+            mysqli_close($con);
+
+            $student_id = '';
+            $first_name = '';
+            $last_name = '';
+        }
+    }
+
+    $con = getDatabaseConnection();
+    $stmt = $con->prepare("SELECT * FROM students");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $students = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    mysqli_close($con);
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">
@@ -33,7 +64,7 @@
 
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtStudentID" name="txtStudentID" placeholder="Student ID" value="<?= isset($student_id) ? $student_id : '' ?>">
+            <input type="number" class="form-control" id="txtStudentID" name="txtStudentID" placeholder="Student ID" value="<?= isset($student_id) ? $student_id : '' ?>">
             <label for="txtStudentID">Student ID</label>
         </div>
 
@@ -64,25 +95,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>
-                                <form method="POST" action="edit.php" class="d-inline">
-                                    <input type="hidden" name="student_id">
-                                    <button type="submit" name="btnEdit" class="btn btn-primary btn-sm">Edit</button>
-                                </form>
+                    <?php if (count($students) > 0): ?>
+                        <?php foreach ($students as $student): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($student['student_id']) ?></td>
+                                <td><?= htmlspecialchars($student['first_name']) ?></td>
+                                <td><?= htmlspecialchars($student['last_name']) ?></td>
+                                <td>
+                                    <form method="POST" action="edit.php" class="d-inline">
+                                        <input type="hidden" name="student_id" value="<?= $student['student_id'] ?>">
+                                        <button type="submit" name="btnEdit" class="btn btn-primary btn-sm">Edit</button>
+                                    </form>
 
-                                <form method="POST" action="delete.php" class="d-inline">
-                                    <input type="hidden" name="student_id">
-                                    <button type="submit" name="btnDelete" class="btn btn-danger btn-sm">Delete</button>
-                                </form>
-                            </td>
+                                    <form method="POST" action="delete.php" class="d-inline">
+                                        <input type="hidden" name="student_id" value="<?= $student['student_id'] ?>">
+                                        <button type="submit" name="btnDelete" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="4" class="text-center">No students found</td>
                         </tr>
-                    <tr>
-                        <td colspan="4" class="text-center">No students found</td>
-                    </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
