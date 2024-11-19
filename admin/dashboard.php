@@ -7,10 +7,10 @@
     require '../functions.php';
     guard();
     
-    $pathDashboard = "#";
-    $pathSubject = "add.php";
-    $pathStudent = "register.php";
+    $pathDashboard = "dashboard.php";
     $pathLogout = "logout.php";
+    $pathSubjects = "subject/add.php";
+    $pathStudents = "student/register.php";
 
     require 'partials/header.php';
     require 'partials/side-bar.php';
