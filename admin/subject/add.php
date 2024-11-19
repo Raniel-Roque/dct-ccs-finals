@@ -30,6 +30,9 @@
             $stmt->execute();
             $stmt->close();
             mysqli_close($con);
+
+            $subject_code = '';
+            $subject_name = '';
         }
     }
 
