@@ -1,5 +1,6 @@
 <!-- Template Files here -->
 <?php
+    ob_start();
     session_start();
     $title = 'Dashboard';
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
