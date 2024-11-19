@@ -7,19 +7,19 @@
         <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                    <a class="nav-link d-flex align-items-center gap-2" href="<?= $pathDashboard ?>">
                         <i class="fa-solid fa-gauge fa-fw me-2"></i>
                         Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                    <a class="nav-link d-flex align-items-center gap-2" href="<?= $pathSubjects ?>">
                         <i class="fa-solid fa-book fa-fw me-2"></i>
                         Subjects
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                    <a class="nav-link d-flex align-items-center gap-2" href="<?= $pathStudents ?>">
                         <i class="fa-solid fa-user fa-fw me-2"></i>
                         Students
                     </a>
@@ -30,7 +30,7 @@
 
             <ul class="nav flex-column mb-auto">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                <a class="nav-link d-flex align-items-center gap-2" href="<?= $pathLogout ?>">
                     <i class="fa-solid fa-right-to-bracket fa-fw me-2"></i>                        
                         Logout
                     </a>
