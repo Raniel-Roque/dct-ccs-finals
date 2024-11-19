@@ -154,30 +154,38 @@
 
     // SUBJECT MANAGEMENT
 
-    function validateSubjectData($subject_data) {
+    function validateSubjectData($subject_code, $subject_name) {
         $arrErrors = [];
     
-        if (empty($subject_data['subject_code'])) {
+        if (empty($subject_code)) {
             $arrErrors[] = "Subject code is required.";
         }
     
-        if (empty($subject_data['subject_name'])) {
+        if (empty($subject_name)) {
             $arrErrors[] = "Subject name is required.";
         }
     
         return $arrErrors;
     }
     
-    function checkDuplicateSubjectData($subject_data) {
+    // Check for Duplicate Subject in Database
+    function checkDuplicateSubjectData($subject_code, $subject_name) {
         $arrErrors = [];
-    
-        foreach ($_SESSION['subjects'] as $subject) {
-            if ($subject['subject_code'] === $subject_data['subject_code'] || $subject['subject_name'] === $subject_data['subject_name']) {
-                $arrErrors[] = "Duplicate Subject";
-                break;
-            }
+        $con = getDatabaseConnection();
+
+        // Check if the subject already exists in the database
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
+        $stmt->bind_param("ss", $subject_code, $subject_name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $arrErrors[] = "Duplicate Subject Code or Subject Name.";
         }
-    
+
+        $stmt->close();
+        mysqli_close($con);
+
         return $arrErrors;
     }
 

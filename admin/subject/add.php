@@ -2,10 +2,10 @@
     session_start();
     $title = 'Dashboard';
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
-    
+
     require '../../functions.php';
     guard();
-    
+
     $pathDashboard = "../dashboard.php";
     $pathLogout = "../logout.php";
     $pathSubjects = "add.php";
@@ -13,6 +13,33 @@
 
     require '../partials/header.php';
     require '../partials/side-bar.php';
+
+    if (isset($_POST['btnAdd'])) {
+        $subject_code = htmlspecialchars(stripslashes(trim($_POST['txtSubjectCode'])));
+        $subject_name = htmlspecialchars(stripslashes(trim($_POST['txtSubjectName'])));
+
+        $arrErrors = validateSubjectData($subject_code, $subject_name);
+        $duplicateErrors = checkDuplicateSubjectData($subject_code, $subject_name);
+        $arrErrors = array_merge($arrErrors, $duplicateErrors);
+        
+        if (empty($arrErrors)) {
+            $con = getDatabaseConnection();
+            $stmt = $con->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
+            $stmt->bind_param("ss", $subject_code, $subject_name);
+            $stmt->execute();
+            $stmt->close();
+            mysqli_close($con);
+        }
+    }
+
+    // Fetch all subjects from the database
+    $con = getDatabaseConnection();
+    $stmt = $con->prepare("SELECT * FROM subjects");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $subjects = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    mysqli_close($con);
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">    
@@ -37,7 +64,7 @@
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtSubjectName" name="txtSubjectName" placeholder="Enter Subject Name">
+            <input type="text" class="form-control" id="txtSubjectName" name="txtSubjectName" placeholder="Subject Name">
             <label for="txtSubjectName">Subject Name</label>
         </div>
 
@@ -57,8 +84,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (isset($_SESSION['subjects']) && count($_SESSION['subjects']) > 0): ?>
-                        <?php foreach ($_SESSION['subjects'] as $subject): ?>
+                    <?php if (count($subjects) > 0): ?>
+                        <?php foreach ($subjects as $subject): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                 <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
@@ -77,7 +104,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="3" class="text-center">No subject found</td>
+                            <td colspan="3" class="text-center">No subjects found</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
