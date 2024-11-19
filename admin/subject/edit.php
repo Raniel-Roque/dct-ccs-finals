@@ -41,6 +41,9 @@
 
         $arrErrors = validateSubjectData($subject_code, $subject_name);
 
+        $duplicateErrors = checkDuplicateSubjectDataForEdit($subject_code, $subject_name);
+        $arrErrors = array_merge($arrErrors, $duplicateErrors);
+
         if (empty($arrErrors)) {
             $con = getDatabaseConnection();
             $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
@@ -70,7 +73,7 @@
     <?php if (!empty($arrErrors)): ?>
         <?= displayErrors($arrErrors); ?>
     <?php endif; ?>
-    
+
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <div class="form-floating mb-3">
             <input type="number" class="form-control bg-light" id="txtSubjectCode" name="subject_code" value="<?= htmlspecialchars($subject['subject_code']); ?>" readonly>
@@ -78,7 +81,7 @@
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtSubjectName" name="subject_name" placeholder="Enter Subject Name" value="<?= htmlspecialchars($subject['subject_name']); ?>">
+            <input type="text" class="form-control" id="txtSubjectName" name="subject_name" placeholder="Enter Subject Name" value="<?= isset($_POST['subject_name']) ? htmlspecialchars($_POST['subject_name']) : htmlspecialchars($subject['subject_name']); ?>">
             <label for="txtSubjectName">Subject Name</label>
         </div>
 
