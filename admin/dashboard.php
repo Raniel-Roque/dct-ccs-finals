@@ -4,13 +4,16 @@
     $title = 'Dashboard';
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
     
-    $pathLogout = "logout.php";
+    require '../functions.php';
+    guard();
     
+    $pathDashboard = "#";
+    $pathSubject = "add.php";
+    $pathStudent = "register.php";
+    $pathLogout = "logout.php";
+
     require 'partials/header.php';
     require 'partials/side-bar.php';
-    require '../functions.php';
-
-    guard();
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">    
