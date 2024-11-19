@@ -1,6 +1,6 @@
 <?php
     session_start();
-    $title = 'Dashboard';
+    $title = 'Add Subject';
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 
     require '../../functions.php';
@@ -59,12 +59,12 @@
 
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <div class="form-floating mb-3">
-            <input type="number" class="form-control" id="txtSubjectCode" name="txtSubjectCode" placeholder="Subject Code">
+            <input type="number" class="form-control" id="txtSubjectCode" name="txtSubjectCode" placeholder="Subject Code" value="<?= isset($subject_code) ? $subject_code : '' ?>">
             <label for="txtSubjectCode">Subject Code</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtSubjectName" name="txtSubjectName" placeholder="Subject Name">
+            <input type="text" class="form-control" id="txtSubjectName" name="txtSubjectName" placeholder="Subject Name" value="<?= isset($subject_name) ? $subject_name : '' ?>">
             <label for="txtSubjectName">Subject Name</label>
         </div>
 
