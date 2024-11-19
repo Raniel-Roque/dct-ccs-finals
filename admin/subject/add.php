@@ -1,4 +1,5 @@
 <?php
+    ob_start();
     session_start();
     $title = 'Add Subject';
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
