@@ -58,6 +58,11 @@
         header("Location: attach-subject.php?student_id=" . $student_id);
         exit;
     }
+
+    if (isset($_POST['btnCancel'])) {
+        header("Location: attach-subject.php?student_id=" . $student_id);
+        exit;
+    }
 ?>
 
 <main class="container justify-content-between align-items-center col-8 mt-4">
