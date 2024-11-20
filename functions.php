@@ -162,6 +162,18 @@
         return $students;
     }
 
+    function getStudentCount() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT COUNT(*) AS student_count FROM students");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+        
+        return $data['student_count'];
+    }
+
     function registerStudent($student_id, $first_name, $last_name) {
         $con = getDatabaseConnection();
         $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
@@ -259,7 +271,6 @@
         return $arrErrors;
     }    
 
-    // Fetch all subjects from the database
     function getSubjects() {
         $con = getDatabaseConnection();
         $stmt = $con->prepare("SELECT * FROM subjects");
@@ -282,8 +293,20 @@
         $stmt->close();
         mysqli_close($con);
     
-        return $subject;  // Return the subject details
+        return $subject; 
     }    
+
+    function getSubjectCount() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT COUNT(*) AS subject_count FROM subjects");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+        
+        return $data['subject_count'];
+    }
 
     function addSubject($subject_code, $subject_name) {
         $con = getDatabaseConnection();
@@ -339,6 +362,50 @@
         $stmt->execute();
         $stmt->close();
         mysqli_close($con);
+    }    
+
+    function getPassFailCount() {
+        $con = getDatabaseConnection();
+        $passedCount = 0;
+        $failedCount = 0;
+    
+        $students = getAllStudents();
+    
+        foreach ($students as $student) {
+            $student_id = $student['student_id'];
+    
+            $stmt = $con->prepare("SELECT grade FROM students_subjects WHERE student_id = ?");
+            $stmt->bind_param("i", $student_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+    
+            $totalGrade = 0;
+            $subjectCount = 0;
+    
+            while ($row = $result->fetch_assoc()) {
+                $totalGrade += $row['grade'];
+                $subjectCount++;
+            }
+    
+            $stmt->close();
+
+            if ($subjectCount > 0) {
+                $averageGrade = $totalGrade / $subjectCount;
+    
+                if ($averageGrade >= 75) {
+                    $passedCount++;
+                } else {
+                    $failedCount++;
+                }
+            }
+        }
+    
+        mysqli_close($con);
+    
+        return [
+            'passed' => $passedCount,
+            'failed' => $failedCount
+        ];
     }    
 
     //ATTACH AND DETTACH
