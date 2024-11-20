@@ -19,22 +19,13 @@
         $student_id = $_POST['student_id'];
 
         // Get student data from the database
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
-        $stmt->bind_param("s", $student_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $student = $result->fetch_assoc();
-        $stmt->close();
-        mysqli_close($con);
+        $student = getStudentData($student_id);
 
         if (!$student) {
-            header("Location: register.php");
-            exit;
+            redirectTo($pathStudents);
         }
     } else {
-        header("Location: register.php");
-        exit;
+        redirectTo($pathStudents);
     }
 
     if (isset($_POST['btnUpdate'])) {
@@ -44,16 +35,8 @@
         $arrErrors = validateStudentData($student_id, $first_name, $last_name);
 
         if (empty($arrErrors)) {
-            // Update student information in the database
-            $con = getDatabaseConnection();
-            $stmt = $con->prepare("UPDATE students SET first_name = ?, last_name = ? WHERE student_id = ?");
-            $stmt->bind_param("sss", $first_name, $last_name, $student_id);
-            $stmt->execute();
-            $stmt->close();
-            mysqli_close($con);
-
-            header("Location: register.php");
-            exit;
+            updateStudent($student_id, $first_name, $last_name);
+            redirectTo($pathStudents);
         }
     }
 ?>

@@ -364,6 +364,15 @@
         mysqli_close($con);
     }    
 
+    function updateStudent($student_id, $first_name, $last_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("UPDATE students SET first_name = ?, last_name = ? WHERE student_id = ?");
+        $stmt->bind_param("sss", $first_name, $last_name, $student_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
     // Redirect to a given page
     function redirectTo($url) {
         header("Location: " . $url);
