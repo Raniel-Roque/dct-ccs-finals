@@ -17,18 +17,17 @@
 
     if (isset($_POST['student_id']) && isset($_POST['subject_id'])) {
         $student_id = $_POST['student_id'];
-        $subject_id = $_POST['subject_id'];  // subject_id is passed from the form
+        $subject_id = $_POST['subject_id'];
 
         $con = getDatabaseConnection();
         
-        // Fetch student and subject details based on student_id and subject_id
         $stmt = $con->prepare("SELECT students.student_id, students.first_name, students.last_name, 
                                           subjects.subject_code, subjects.subject_name
                                    FROM students
                                    JOIN students_subjects ON students.student_id = students_subjects.student_id
                                    JOIN subjects ON subjects.subject_code = students_subjects.subject_id
                                    WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
-        $stmt->bind_param("ii", $student_id, $subject_id);  // Use both student_id and subject_id for the query
+        $stmt->bind_param("ii", $student_id, $subject_id);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -47,18 +46,15 @@
         exit;
     }
 
-    // Detach subject when the confirmation button is clicked
     if (isset($_POST['btnConfirmDetach'])) {
         $con = getDatabaseConnection();
         
-        // Perform the delete operation to detach the subject from the student
         $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ? AND subject_id = ?");
-        $stmt->bind_param("ii", $student_id, $subject_id);  // subject_id and student_id are used in the delete query
+        $stmt->bind_param("ii", $student_id, $subject_id);
         $stmt->execute();
         $stmt->close();
         mysqli_close($con);
 
-        // After detaching, redirect back to the attach-subject.php page
         header("Location: attach-subject.php?student_id=" . $student_id);
         exit;
     }
@@ -89,7 +85,7 @@
         </ul>
 
         <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
-        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject_id); ?>"> <!-- subject_id passed in form -->
+        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject_id); ?>">
 
         <div>
             <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>
