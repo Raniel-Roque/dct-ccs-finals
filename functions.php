@@ -228,7 +228,8 @@
         $con = getDatabaseConnection();
     
         $stmt = $con->prepare("SELECT students.student_id, 
-                                      CONCAT(students.first_name, ' ', students.last_name) AS full_name, 
+                                      students.first_name, 
+                                      students.last_name, 
                                       subjects.subject_code, 
                                       subjects.subject_name, 
                                       students_subjects.grade
@@ -244,13 +245,13 @@
             $data = $result->fetch_assoc();
             $stmt->close();
             mysqli_close($con);
-            return $data; // Return the fetched data
+            return $data; // Return the fetched data including first_name and last_name
         }
     
         $stmt->close();
         mysqli_close($con);
         return null; // Return null if no result found
-    }
+    }    
     
     function handleGradeAssignment($student_id, $subject_id, $grade) {    
         $con = getDatabaseConnection();
@@ -354,6 +355,14 @@
         mysqli_close($con);
     }
 
+    function detachSubjectFromStudent($student_id, $subject_id) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ? AND subject_id = ?");
+        $stmt->bind_param("ii", $student_id, $subject_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
 
     // Redirect to a given page
     function redirectTo($url) {

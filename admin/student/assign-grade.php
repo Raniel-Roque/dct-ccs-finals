@@ -25,7 +25,8 @@
         $studentSubjectDetails = getStudentSubjectDetails($student_id, $subject_id);
 
         if ($studentSubjectDetails) {
-            $full_name = $studentSubjectDetails['full_name'];
+            // Concatenate first name and last name to create the full name
+            $full_name = $studentSubjectDetails['first_name'] . ' ' . $studentSubjectDetails['last_name'];
             $subject_code = $studentSubjectDetails['subject_code'];
             $subject_name = $studentSubjectDetails['subject_name'];
             $grade = $studentSubjectDetails['grade'];
