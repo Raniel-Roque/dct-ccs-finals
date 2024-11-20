@@ -17,40 +17,22 @@
 
     if (isset($_POST['subject_code'])) {
         $subject_code = $_POST['subject_code'];
-
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
-        $stmt->bind_param("s", $subject_code);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $subject = $result->fetch_assoc();
-        $stmt->close();
-        mysqli_close($con);
+        $subject = getSubjectByCode($subject_code);
 
         if (!$subject) {
-            header("Location: add.php");
-            exit;
+            redirectTo('add.php');
         }
     } else {
-        header("Location: add.php");
-        exit;
+        redirectTo('add.php');
     }
 
     if (isset($_POST['btnConfirmDelete'])) {
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("DELETE FROM subjects WHERE subject_code = ?");
-        $stmt->bind_param("s", $subject_code);
-        $stmt->execute();
-        $stmt->close();
-        mysqli_close($con);
-
-        header("Location: add.php");
-        exit;
+        deleteSubjectByCode($subject_code);
+        redirectTo('add.php');
     }
 
     if (isset($_POST['btnCancel'])) {
-        header("Location: add.php");
-        exit;
+        redirectTo('add.php');
     }
 ?>
 
@@ -70,11 +52,11 @@
         <p>Are you sure you want to delete the following subject record?</p>
 
         <ul>
-            <li><strong>Subject Code:</strong> <?= htmlspecialchars($subject['subject_code']); ?> </li>
-            <li><strong>Subject Name:</strong> <?= htmlspecialchars($subject['subject_name']); ?> </li>
+            <li><strong>Subject Code:</strong> <?= sanitize($subject['subject_code']); ?> </li>
+            <li><strong>Subject Name:</strong> <?= sanitize($subject['subject_name']); ?> </li>
         </ul>
 
-        <input type="hidden" name="subject_code" value="<?= htmlspecialchars($subject['subject_code']); ?>">
+        <input type="hidden" name="subject_code" value="<?= sanitize($subject['subject_code']); ?>">
 
         <div>
             <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>

@@ -1,4 +1,4 @@
-<?php
+<?php   
     ob_start();
     session_start();
     $title = 'Delete Student';
@@ -16,41 +16,24 @@
     require '../partials/side-bar.php';
 
     if (isset($_POST['student_id'])) {
-        $student_id = $_POST['student_id'];
-
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
-        $stmt->bind_param("s", $student_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $student = $result->fetch_assoc();
-        $stmt->close();
-        mysqli_close($con);
+        $student_id = sanitize($_POST['student_id']);
+        $student = getStudentData($student_id);
 
         if (!$student) {
-            header("Location: register.php");
-            exit;
+            redirectTo("register.php");
         }
     } else {
-        header("Location: register.php");
-        exit;
+        redirectTo("register.php");
     }
 
+    // Delete student and related subjects on confirmation
     if (isset($_POST['btnConfirmDelete'])) {
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("DELETE FROM students WHERE student_id = ?");
-        $stmt->bind_param("s", $student_id);
-        $stmt->execute();
-        $stmt->close();
-        mysqli_close($con);
-
-        header("Location: register.php");
-        exit;
+        deleteStudentAndSubjects($student_id);
+        redirectTo("register.php");
     }
 
     if (isset($_POST['btnCancel'])) {
-        header("Location: register.php");
-        exit;
+        redirectTo("register.php");
     }
 ?>
 
@@ -70,12 +53,12 @@
         <p>Are you sure you want to delete the following student record?</p>
 
         <ul>
-            <li><strong>Student ID:</strong> <?= htmlspecialchars($student['student_id']); ?> </li>
-            <li><strong>First Name:</strong> <?= htmlspecialchars($student['first_name']); ?> </li>
-            <li><strong>Last Name:</strong> <?= htmlspecialchars($student['last_name']); ?> </li>
+            <li><strong>Student ID:</strong> <?= sanitize($student['student_id']); ?> </li>
+            <li><strong>First Name:</strong> <?= sanitize($student['first_name']); ?> </li>
+            <li><strong>Last Name:</strong> <?= sanitize($student['last_name']); ?> </li>
         </ul>
 
-        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student['student_id']); ?>">
+        <input type="hidden" name="student_id" value="<?= sanitize($student['student_id']); ?>">
 
         <div>
             <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>

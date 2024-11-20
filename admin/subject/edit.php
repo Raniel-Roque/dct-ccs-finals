@@ -16,28 +16,19 @@
     require '../partials/side-bar.php';
 
     if (isset($_POST['subject_code'])) {
-        $subject_code = $_POST['subject_code'];
-        
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
-        $stmt->bind_param("s", $subject_code);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $subject = $result->fetch_assoc();
-        $stmt->close();
-        mysqli_close($con);
+        $subject_code = sanitize($_POST['subject_code']);
+
+        $subject = getSubjectByCode($subject_code);
 
         if (!$subject) {
-            header("Location: add.php");
-            exit;
+            redirectTo('add.php');
         }
     } else {
-        header("Location: add.php");
-        exit;
+        redirectTo('add.php');
     }
 
     if (isset($_POST['btnUpdate'])) {
-        $subject_name = htmlspecialchars(stripslashes(trim($_POST['subject_name'])));
+        $subject_name = sanitize($_POST['subject_name']);
 
         $arrErrors = validateSubjectData($subject_code, $subject_name);
 
@@ -45,15 +36,9 @@
         $arrErrors = array_merge($arrErrors, $duplicateErrors);
 
         if (empty($arrErrors)) {
-            $con = getDatabaseConnection();
-            $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
-            $stmt->bind_param("ss", $subject_name, $subject_code);
-            $stmt->execute();
-            $stmt->close();
-            mysqli_close($con);
+            updateSubject($subject_code, $subject_name);
 
-            header("Location: add.php");
-            exit;
+            redirectTo('add.php');
         }
     }
 ?>
@@ -76,12 +61,12 @@
 
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <div class="form-floating mb-3">
-            <input type="number" class="form-control bg-light" id="txtSubjectCode" name="subject_code" value="<?= htmlspecialchars($subject['subject_code']); ?>" readonly>
+            <input type="number" class="form-control bg-light" id="txtSubjectCode" name="subject_code" value="<?= sanitize($subject['subject_code']); ?>" readonly>
             <label for="txtSubjectCode">Subject Code</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtSubjectName" name="subject_name" placeholder="Enter Subject Name" value="<?= isset($_POST['subject_name']) ? htmlspecialchars($_POST['subject_name']) : htmlspecialchars($subject['subject_name']); ?>">
+            <input type="text" class="form-control" id="txtSubjectName" name="subject_name" placeholder="Enter Subject Name" value="<?= isset($_POST['subject_name']) ? sanitize($_POST['subject_name']) : sanitize($subject['subject_name']); ?>">
             <label for="txtSubjectName">Subject Name</label>
         </div>
 

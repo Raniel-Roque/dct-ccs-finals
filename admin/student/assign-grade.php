@@ -15,81 +15,57 @@
     require '../partials/header.php';
     require '../partials/side-bar.php';
 
-    if (isset($_POST['student_id']) && isset($_POST['subject_id'])) {
-        $student_id = (int)$_POST['student_id'];
-        $subject_id = (int)$_POST['subject_id'];
+    $arrErrors = [];
 
-        $con = getDatabaseConnection();
+    if (isset($_POST['student_id'], $_POST['subject_id'])) {
+        $student_id = sanitize($_POST['student_id']);
+        $subject_id = sanitize($_POST['subject_id']);
 
-        $stmt = $con->prepare("SELECT students.student_id, 
-                                      CONCAT(students.first_name, ' ', students.last_name) AS full_name, 
-                                      subjects.subject_code, 
-                                      subjects.subject_name, 
-                                      students_subjects.grade
-                               FROM students
-                               JOIN students_subjects ON students.student_id = students_subjects.student_id
-                               JOIN subjects ON subjects.subject_code = students_subjects.subject_id
-                               WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
-        $stmt->bind_param("ii", $student_id, $subject_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $studentSubjectDetails = getStudentSubjectDetails($student_id, $subject_id);
 
-        if ($result->num_rows > 0) {
-            $data = $result->fetch_assoc();
-            $full_name = $data['full_name'];
-            $subject_code = $data['subject_code'];
-            $subject_name = $data['subject_name'];
-            $grade = $data['grade']; // Fetch the grade from the database
+        if ($studentSubjectDetails) {
+            $full_name = sanitize($studentSubjectDetails['first_name'] . ' ' . $studentSubjectDetails['last_name']);
+            $subject_code = sanitize($studentSubjectDetails['subject_code']);
+            $subject_name = sanitize($studentSubjectDetails['subject_name']);
+            $grade = sanitize($studentSubjectDetails['grade']);
         } else {
-            header("Location: register.php");
-            exit;
+            redirectTo($pathStudents);
         }
-
-        $stmt->close();
-        mysqli_close($con);
     } else {
-        header("Location: register.php");
-        exit;
+        redirectTo($pathStudents);
     }
 
-    if (isset($_POST['btnAssignGrade']) && isset($_POST['txtGrade'])) {
-        $grade = $_POST['txtGrade'];
+    if (isset($_POST['btnAssignGrade'], $_POST['txtGrade'])) {
+        $grade = sanitize($_POST['txtGrade']);
         $arrErrors = validateGrade($grade);
 
-        if(empty($arrErrors)) {
-            $con = getDatabaseConnection();
-
-            $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
-            $stmt->bind_param("dii", $grade, $student_id, $subject_id);
-            $stmt->execute();
-            $stmt->close();
-            mysqli_close($con);
-    
-            header("Location: attach-subject.php?student_id=" . $student_id);
-            exit;
+        if (empty($arrErrors)) {
+            handleGradeAssignment($student_id, $subject_id, $grade);
+            redirectTo("attach-subject.php?student_id=" . $student_id);
         }
     }
 
     if (isset($_POST['btnCancel'])) {
-        header("Location: attach-subject.php?student_id=" . $student_id);
-        exit;
+        redirectTo("attach-subject.php?student_id=" . $student_id);
     }
 ?>
 
-<main class="container justify-content-between align-items-center col-8 mt-4">
-    <h2 class="mt-4">Attach Subject to Student</h2>
+<main class="container col-8 mt-4">
+    <h2 class="mt-4">Assign Grade to Subject</h2>
     <div class="mt-5 mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="../dashboard.php" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="register.php" class="text-decoration-none">Register Student</a></li>
-                <li class="breadcrumb-item"><a href="attach-subject.php?student_id=<?= htmlspecialchars($student_id); ?>" class="text-decoration-none">Attach Subject to Student</a></li>
+                <li class="breadcrumb-item">
+                    <a href="attach-subject.php?student_id=<?= sanitize($student_id); ?>" class="text-decoration-none">Attach Subject to Student</a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">Assign Grade to Subject</li>
             </ol>
         </nav>
     </div>
 
-    <?php if (!empty($arrErrors)): ?>
+    <?php if ($arrErrors): ?>
         <?= displayErrors($arrErrors); ?>
     <?php endif; ?>
 
@@ -97,29 +73,28 @@
         <h4>Selected Student and Subject Information</h4>
 
         <ul>
-            <li><strong>Student ID:</strong> <?= htmlspecialchars($student_id); ?></li>
-            <li><strong>Name:</strong> <?= htmlspecialchars($full_name); ?></li>
-            <li><strong>Subject Code:</strong> <?= htmlspecialchars($subject_code); ?></li>
-            <li><strong>Subject Name:</strong> <?= htmlspecialchars($subject_name); ?></li>
+            <li><strong>Student ID:</strong> <?= sanitize($student_id); ?></li>
+            <li><strong>Name:</strong> <?= sanitize($full_name); ?></li>
+            <li><strong>Subject Code:</strong> <?= sanitize($subject_code); ?></li>
+            <li><strong>Subject Name:</strong> <?= sanitize($subject_name); ?></li>
         </ul>
 
         <hr>
 
         <div class="form-floating mb-3">
             <input type="number" class="form-control" id="txtGrade" name="txtGrade" placeholder="Grade" 
-                value="<?= isset($_POST['txtGrade']) ? htmlspecialchars($_POST['txtGrade']) : number_format(htmlspecialchars($grade), 2); ?>">
+                value="<?= isset($_POST['txtGrade']) ? sanitize($_POST['txtGrade']) : number_format(sanitize($grade), 2); ?>">
             <label for="txtGrade">Grade</label>
         </div>
 
-        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
-        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject_id); ?>">
+        <input type="hidden" name="student_id" value="<?= sanitize($student_id); ?>">
+        <input type="hidden" name="subject_id" value="<?= sanitize($subject_id); ?>">
 
         <div>
             <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>
             <button name="btnAssignGrade" type="submit" class="btn btn-primary">Assign Grade</button>
         </div>
     </form>
-
 </main>
 
 <?php require '../partials/footer.php'; ?>

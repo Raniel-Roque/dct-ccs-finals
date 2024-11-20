@@ -16,52 +16,28 @@
     require '../partials/side-bar.php';
 
     if (isset($_POST['student_id']) && isset($_POST['subject_id'])) {
-        $student_id = $_POST['student_id'];
-        $subject_id = $_POST['subject_id'];
+        $student_id = sanitize($_POST['student_id']);
+        $subject_id = sanitize($_POST['subject_id']);
 
-        $con = getDatabaseConnection();
-        
-        $stmt = $con->prepare("SELECT students.student_id, students.first_name, students.last_name, 
-                                          subjects.subject_code, subjects.subject_name
-                                   FROM students
-                                   JOIN students_subjects ON students.student_id = students_subjects.student_id
-                                   JOIN subjects ON subjects.subject_code = students_subjects.subject_id
-                                   WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
-        $stmt->bind_param("ii", $student_id, $subject_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $studentSubjectDetails = getStudentSubjectDetails($student_id, $subject_id);
 
-        if ($result->num_rows > 0) {
-            $data = $result->fetch_assoc();
-            $first_name = $data['first_name'];
-            $last_name = $data['last_name'];
-            $subject_code = $data['subject_code'];
-            $subject_name = $data['subject_name'];
+        if ($studentSubjectDetails) {
+            $first_name = sanitize($studentSubjectDetails['first_name']);
+            $last_name = sanitize($studentSubjectDetails['last_name']);
+            $subject_code = sanitize($studentSubjectDetails['subject_code']);
+            $subject_name = sanitize($studentSubjectDetails['subject_name']);
         }
-
-        $stmt->close();
-        mysqli_close($con);
     } else {
-        header("Location: register.php");
-        exit;
+        redirectTo("register.php");
     }
 
     if (isset($_POST['btnConfirmDetach'])) {
-        $con = getDatabaseConnection();
-        
-        $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ? AND subject_id = ?");
-        $stmt->bind_param("ii", $student_id, $subject_id);
-        $stmt->execute();
-        $stmt->close();
-        mysqli_close($con);
-
-        header("Location: attach-subject.php?student_id=" . $student_id);
-        exit;
+        detachSubjectFromStudent($student_id, $subject_id);
+        redirectTo("attach-subject.php?student_id=" . $student_id);
     }
 
     if (isset($_POST['btnCancel'])) {
-        header("Location: attach-subject.php?student_id=" . $student_id);
-        exit;
+        redirectTo("attach-subject.php?student_id=" . $student_id);
     }
 ?>
 
@@ -72,7 +48,7 @@
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="../dashboard.php" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="register.php" class="text-decoration-none">Register Student</a></li>
-                <li class="breadcrumb-item"><a href="attach-subject.php?student_id=<?= htmlspecialchars($student_id); ?>" class="text-decoration-none">Attach Subject to Student</a></li>
+                <li class="breadcrumb-item"><a href="attach-subject.php?student_id=<?= sanitize($student_id); ?>" class="text-decoration-none">Attach Subject to Student</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Detach Subject from Student</li>
             </ol>
         </nav>
@@ -82,15 +58,15 @@
         <p>Are you sure you want to detach the following subject from this student?</p>
 
         <ul>
-            <li><strong>Student ID:</strong> <?= htmlspecialchars($student_id); ?></li>
-            <li><strong>First Name:</strong> <?= htmlspecialchars($first_name); ?></li>
-            <li><strong>Last Name:</strong> <?= htmlspecialchars($last_name); ?></li>
-            <li><strong>Subject Code:</strong> <?= htmlspecialchars($subject_code); ?></li>
-            <li><strong>Subject Name:</strong> <?= htmlspecialchars($subject_name); ?></li>
+            <li><strong>Student ID:</strong> <?= sanitize($student_id); ?></li>
+            <li><strong>First Name:</strong> <?= sanitize($first_name); ?></li>
+            <li><strong>Last Name:</strong> <?= sanitize($last_name); ?></li>
+            <li><strong>Subject Code:</strong> <?= sanitize($subject_code); ?></li>
+            <li><strong>Subject Name:</strong> <?= sanitize($subject_name); ?></li>
         </ul>
 
-        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
-        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject_id); ?>">
+        <input type="hidden" name="student_id" value="<?= sanitize($student_id); ?>">
+        <input type="hidden" name="subject_id" value="<?= sanitize($subject_id); ?>">
 
         <div>
             <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>

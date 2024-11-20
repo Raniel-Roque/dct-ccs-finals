@@ -1,4 +1,5 @@
 <?php   
+    // DB CONNECTION
     function getDatabaseConnection() {
         $host = "localhost";
         $username = "root";
@@ -16,6 +17,7 @@
         return $con;
     }
 
+    // USER AUTHENTICATION
     function validateLoginCredentials($email, $password) {    
         $arrErrors = [];
         
@@ -33,26 +35,22 @@
     }
     
     function checkLoginCredentials($email, $password) {
-        // Get database connection
         $con = getDatabaseConnection();
     
-        // Use prepared statements to prevent SQL injection
         $stmt = $con->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
         $stmt->bind_param("ss", $email, $password);
         $stmt->execute();
         $result = $stmt->get_result();
     
-        // Check if a user was found
         if ($result->num_rows > 0) {
             $stmt->close();
             mysqli_close($con);
-            return true; // Login successful
+            return true; 
         }
     
-        // Close connections
         $stmt->close();
         mysqli_close($con);
-        return false; // Invalid credentials
+        return false; 
     }
     
 
@@ -97,11 +95,6 @@
         return '';
     }
 
-    function getBaseURL() {
-        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
-        return $protocol . $_SERVER['HTTP_HOST'];
-    }
-
     // STUDENT MANAGEMENT
     function validateStudentData($student_id, $first_name, $last_name) {
         $arrErrors = [];
@@ -143,22 +136,67 @@
 
         return $arrErrors;
     }
+
+    function getStudentData($student_id) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $student_data = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+
+        return $student_data;
+    }
+
+    function getAllStudents() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM students");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $students = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        mysqli_close($con);
     
-    function getSelectedStudentIndex($student_id) {
-        foreach ($_SESSION['students'] as $index => $student) {
-            if ($student['student_id'] === $student_id) {
-                return $index;
-            }
-        }
-        return null;  // Return null if student is not found
+        return $students;
     }
 
-    function getSelectedStudentData($index) {
-        return isset($_SESSION['students'][$index]) ? $_SESSION['students'][$index] : null;
+    function registerStudent($student_id, $first_name, $last_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $student_id, $first_name, $last_name);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
     }
 
+    function updateStudent($student_id, $first_name, $last_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("UPDATE students SET first_name = ?, last_name = ? WHERE student_id = ?");
+        $stmt->bind_param("sss", $first_name, $last_name, $student_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
+    function deleteStudentAndSubjects($student_id) {
+        $con = getDatabaseConnection();
+
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $con->prepare("DELETE FROM students WHERE student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $stmt->close();
+
+        mysqli_close($con);
+    }
+    
     // SUBJECT MANAGEMENT
-
     function validateSubjectData($subject_code, $subject_name) {
         $arrErrors = [];
     
@@ -173,12 +211,10 @@
         return $arrErrors;
     }
     
-    // Check for Duplicate Subject in Database
     function checkDuplicateSubjectData($subject_code, $subject_name) {
         $arrErrors = [];
         $con = getDatabaseConnection();
 
-        // Check if the subject already exists in the database
         $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
         $stmt->bind_param("ss", $subject_code, $subject_name);
         $stmt->execute();
@@ -198,7 +234,6 @@
         $arrErrors = [];
         $con = getDatabaseConnection();
     
-        // Check if the subject name already exists for a different subject
         $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_name = ? AND subject_code != ?");
         $stmt->bind_param("ss", $subject_name, $subject_code);
         $stmt->execute();
@@ -214,19 +249,6 @@
         return $arrErrors;
     }    
 
-    function getSelectedSubjectIndex($subject_code) {
-        foreach ($_SESSION['subjects'] as $index => $subject) {
-            if ($subject['subject_code'] === $subject_code) {
-                return $index;
-            }
-        }
-        return null;  // Return null if subject is not found
-    }
-    
-    function getSelectedSubjectData($index) {
-        return isset($_SESSION['subjects'][$index]) ? $_SESSION['subjects'][$index] : null;
-    }    
-    
     function validateAttachedSubject($subject_data) {
         $arrErrors = [];
     
@@ -237,16 +259,193 @@
         return $arrErrors;
     }    
 
+    // Fetch all subjects from the database
+    function getSubjects() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM subjects");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $subjects = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        mysqli_close($con);
+
+        return $subjects;
+    }
+
+    function getSubjectByCode($subject_code) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+        $stmt->bind_param("s", $subject_code);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $subject = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+    
+        return $subject;  // Return the subject details
+    }    
+
+    function addSubject($subject_code, $subject_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
+        $stmt->bind_param("ss", $subject_code, $subject_name);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }
+
+    function updateSubject($subject_code, $subject_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
+        $stmt->bind_param("ss", $subject_name, $subject_code);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
+    function deleteSubjectByCode($subject_code) {
+        $con = getDatabaseConnection();
+    
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE subject_id = ?");
+        $stmt->bind_param("s", $subject_code);
+        $stmt->execute();
+        $stmt->close();
+    
+        $stmt = $con->prepare("DELETE FROM subjects WHERE subject_code = ?");
+        $stmt->bind_param("s", $subject_code);
+        $stmt->execute();
+        $stmt->close();
+    
+        mysqli_close($con);
+    }     
+
     //GRADE MANAGEMENT
     function validateGrade($grade) {
         $arrErrors = [];
 
         if(empty($grade)) {
             $arrErrors[] = "Grade is Required";
-        } else if ($grade < 64 || $grade > 101) {
+        } else if ($grade < 65 || $grade > 100) {
             $arrErrors[] = "Grade must be between 65 and 100.";
         }
 
         return $arrErrors;
+    }
+
+    function handleGradeAssignment($student_id, $subject_id, $grade) {    
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
+        $stmt->bind_param("dii", $grade, $student_id, $subject_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
+    //ATTACH AND DETTACH
+    function getStudentSubjectDetails($student_id, $subject_id) {
+        $con = getDatabaseConnection();
+    
+        $stmt = $con->prepare("SELECT students.student_id, 
+                                      students.first_name, 
+                                      students.last_name, 
+                                      subjects.subject_code, 
+                                      subjects.subject_name, 
+                                      students_subjects.grade
+                               FROM students
+                               JOIN students_subjects ON students.student_id = students_subjects.student_id
+                               JOIN subjects ON subjects.subject_code = students_subjects.subject_id
+                               WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
+        $stmt->bind_param("ii", $student_id, $subject_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows > 0) {
+            $data = $result->fetch_assoc();
+            $stmt->close();
+            mysqli_close($con);
+            return $data;
+        }
+    
+        $stmt->close();
+        mysqli_close($con);
+        return null;
+    }    
+
+    function getAttachedSubjects($student_id) {
+        $attachedSubjects = [];
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT subjects.subject_code, subjects.subject_name, students_subjects.grade 
+                            FROM subjects 
+                            JOIN students_subjects ON subjects.subject_code = students_subjects.subject_id
+                            WHERE students_subjects.student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $attachedSubjects[] = $row;
+        }
+        $stmt->close();
+        mysqli_close($con);
+
+        return $attachedSubjects;
+    }
+
+    function getAvailableSubjects($student_id) {
+        $availableSubjects = [];
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $availableSubjects[] = $row;
+        }
+        $stmt->close();
+        mysqli_close($con);
+
+        return $availableSubjects;
+    }
+
+    function attachSubjectsToStudent($student_id, $subject_codes) {
+        $con = getDatabaseConnection();
+        foreach ($subject_codes as $subject_code) {
+            $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+            $stmt->bind_param("i", $subject_code);
+            $stmt->execute();
+            $subject_data = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            if ($subject_data) {
+                $stmt = $con->prepare("INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, 0)");
+                $stmt->bind_param("ii", $student_id, $subject_code);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        mysqli_close($con);
+    }
+
+    function detachSubjectFromStudent($student_id, $subject_id) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ? AND subject_id = ?");
+        $stmt->bind_param("ii", $student_id, $subject_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
+    // OTHER FUNCTIONS
+    function redirectTo($url) {
+        header("Location: " . $url);
+        exit;
+    }
+
+    function sanitize($data) {
+        return htmlspecialchars(stripslashes(trim($data)), ENT_QUOTES, 'UTF-8');
+    }    
+
+    function getBaseURL() {
+        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
+        return $protocol . $_SERVER['HTTP_HOST'];
     }
 ?>
