@@ -364,6 +364,15 @@
         mysqli_close($con);
     }    
 
+    function deleteSubjectByCode($subject_code) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("DELETE FROM subjects WHERE subject_code = ?");
+        $stmt->bind_param("s", $subject_code);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
     function updateStudent($student_id, $first_name, $last_name) {
         $con = getDatabaseConnection();
         $stmt = $con->prepare("UPDATE students SET first_name = ?, last_name = ? WHERE student_id = ?");
@@ -394,6 +403,42 @@
         return $students;
     }
 
+    // Add a new subject to the database
+    function addSubject($subject_code, $subject_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
+        $stmt->bind_param("ss", $subject_code, $subject_name);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }
+
+    // Fetch all subjects from the database
+    function getSubjects() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM subjects");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $subjects = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        mysqli_close($con);
+
+        return $subjects;
+    }
+
+    function getSubjectByCode($subject_code) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+        $stmt->bind_param("s", $subject_code);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $subject = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+    
+        return $subject;  // Return the subject details
+    }    
+
     // Redirect to a given page
     function redirectTo($url) {
         header("Location: " . $url);
@@ -401,6 +446,24 @@
     }
 
     function sanitize($data) {
-        return htmlspecialchars(stripslashes(trim($data)));
+        return htmlspecialchars(stripslashes(trim($data)), ENT_QUOTES, 'UTF-8');
+    }    
+
+    function deleteStudentSubjectAssignments($subject_code) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE subject_id = ?");
+        $stmt->bind_param("s", $subject_code);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
+    function updateSubject($subject_code, $subject_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("UPDATE subjects SET subject_name = ? WHERE subject_code = ?");
+        $stmt->bind_param("ss", $subject_name, $subject_code);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
     }    
 ?>
