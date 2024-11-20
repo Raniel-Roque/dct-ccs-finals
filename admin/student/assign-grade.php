@@ -14,6 +14,55 @@
 
     require '../partials/header.php';
     require '../partials/side-bar.php';
+
+    if (isset($_POST['student_id']) && isset($_POST['subject_id'])) {
+        $student_id = (int)$_POST['student_id'];
+        $subject_id = (int)$_POST['subject_id'];
+
+        $con = getDatabaseConnection();
+
+        $stmt = $con->prepare("SELECT students.student_id, 
+                                      CONCAT(students.first_name, ' ', students.last_name) AS full_name, 
+                                      subjects.subject_code, subjects.subject_name 
+                               FROM students
+                               JOIN students_subjects ON students.student_id = students_subjects.student_id
+                               JOIN subjects ON subjects.subject_code = students_subjects.subject_id
+                               WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
+        $stmt->bind_param("ii", $student_id, $subject_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $data = $result->fetch_assoc();
+            $full_name = $data['full_name'];
+            $subject_code = $data['subject_code'];
+            $subject_name = $data['subject_name'];
+        } else {
+            header("Location: register.php");
+            exit;
+        }
+
+        $stmt->close();
+        mysqli_close($con);
+    } else {
+        header("Location: register.php");
+        exit;
+    }
+
+    if (isset($_POST['btnAssignGrade']) && isset($_POST['txtGrade'])) {
+        $grade = (float)$_POST['txtGrade'];
+
+        $con = getDatabaseConnection();
+
+        $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
+        $stmt->bind_param("dii", $grade, $student_id, $subject_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+
+        header("Location: attach-subject.php?student_id=" . $student_id);
+        exit;
+    }
 ?>
 
 <main class="container justify-content-between align-items-center col-8 mt-4">
@@ -34,17 +83,19 @@
     <?php endif; ?>
 
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
-        <h3>Selected Student and Subject Information</h3>
+        <h4>Selected Student and Subject Information</h4>
 
         <ul>
             <li><strong>Student ID:</strong> <?= htmlspecialchars($student_id); ?></li>
-            <li><strong>Name:</strong> <?= htmlspecialchars($first_name); ?></li>
+            <li><strong>Name:</strong> <?= htmlspecialchars($full_name); ?></li>
             <li><strong>Subject Code:</strong> <?= htmlspecialchars($subject_code); ?></li>
             <li><strong>Subject Name:</strong> <?= htmlspecialchars($subject_name); ?></li>
         </ul>
 
+        <hr>
+
         <div class="form-floating mb-3">
-            <input type="number" class="form-control" id="txtGrade" name="txtGrade" placeholder="Grade" value="<?= isset($subject_code) ? $subject_code : '0.00' ?>">
+            <input type="number" class="form-control" id="txtGrade" name="txtGrade" placeholder="Grade" value="<?= isset($grade) ? $grade : '0.00' ?>">
             <label for="txtGrade">Grade</label>
         </div>
 
@@ -53,7 +104,7 @@
 
         <div>
             <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>
-            <button name="btnAssignGrade" type="submit" class="btn btn-primary">Assign Grade to Subject</button>
+            <button name="btnAssignGrade" type="submit" class="btn btn-primary">Assign Grade</button>
         </div>
     </form>
 </main>
