@@ -5,7 +5,7 @@
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 
     require '../../functions.php';
-    guard();
+    guard();  // Ensure the user is logged in
 
     $pathDashboard = "../dashboard.php";
     $pathLogout = "../logout.php";
@@ -19,57 +19,36 @@
         $student_id = (int)$_POST['student_id'];
         $subject_id = (int)$_POST['subject_id'];
 
-        $con = getDatabaseConnection();
+        // Get student and subject details
+        $studentSubjectDetails = getStudentSubjectDetails($student_id, $subject_id);
 
-        $stmt = $con->prepare("SELECT students.student_id, 
-                                      CONCAT(students.first_name, ' ', students.last_name) AS full_name, 
-                                      subjects.subject_code, 
-                                      subjects.subject_name, 
-                                      students_subjects.grade
-                               FROM students
-                               JOIN students_subjects ON students.student_id = students_subjects.student_id
-                               JOIN subjects ON subjects.subject_code = students_subjects.subject_id
-                               WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
-        $stmt->bind_param("ii", $student_id, $subject_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            $data = $result->fetch_assoc();
-            $full_name = $data['full_name'];
-            $subject_code = $data['subject_code'];
-            $subject_name = $data['subject_name'];
-            $grade = $data['grade']; // Fetch the grade from the database
+        if ($studentSubjectDetails) {
+            $full_name = $studentSubjectDetails['full_name'];
+            $subject_code = $studentSubjectDetails['subject_code'];
+            $subject_name = $studentSubjectDetails['subject_name'];
+            $grade = $studentSubjectDetails['grade'];
         } else {
             header("Location: register.php");
             exit;
         }
-
-        $stmt->close();
-        mysqli_close($con);
     } else {
         header("Location: register.php");
         exit;
     }
 
+    // Handle form submission for grade assignment
     if (isset($_POST['btnAssignGrade']) && isset($_POST['txtGrade'])) {
         $grade = $_POST['txtGrade'];
         $arrErrors = validateGrade($grade);
 
-        if(empty($arrErrors)) {
-            $con = getDatabaseConnection();
-
-            $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
-            $stmt->bind_param("dii", $grade, $student_id, $subject_id);
-            $stmt->execute();
-            $stmt->close();
-            mysqli_close($con);
-    
+        if (empty($arrErrors)) {
+            handleGradeAssignment($student_id, $subject_id, $grade);
             header("Location: attach-subject.php?student_id=" . $student_id);
             exit;
         }
     }
 
+    // Handle cancellation
     if (isset($_POST['btnCancel'])) {
         header("Location: attach-subject.php?student_id=" . $student_id);
         exit;
@@ -77,7 +56,7 @@
 ?>
 
 <main class="container justify-content-between align-items-center col-8 mt-4">
-    <h2 class="mt-4">Attach Subject to Student</h2>
+    <h2 class="mt-4">Assign Grade to Subject</h2>
     <div class="mt-5 mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">

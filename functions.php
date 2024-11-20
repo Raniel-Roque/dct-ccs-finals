@@ -217,10 +217,120 @@
 
         if(empty($grade)) {
             $arrErrors[] = "Grade is Required";
-        } else if ($grade < 64 || $grade > 101) {
+        } else if ($grade < 65 || $grade > 100) {
             $arrErrors[] = "Grade must be between 65 and 100.";
         }
 
         return $arrErrors;
     }
+
+    function getStudentSubjectDetails($student_id, $subject_id) {
+        $con = getDatabaseConnection();
+    
+        $stmt = $con->prepare("SELECT students.student_id, 
+                                      CONCAT(students.first_name, ' ', students.last_name) AS full_name, 
+                                      subjects.subject_code, 
+                                      subjects.subject_name, 
+                                      students_subjects.grade
+                               FROM students
+                               JOIN students_subjects ON students.student_id = students_subjects.student_id
+                               JOIN subjects ON subjects.subject_code = students_subjects.subject_id
+                               WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?");
+        $stmt->bind_param("ii", $student_id, $subject_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows > 0) {
+            $data = $result->fetch_assoc();
+            $stmt->close();
+            mysqli_close($con);
+            return $data; // Return the fetched data
+        }
+    
+        $stmt->close();
+        mysqli_close($con);
+        return null; // Return null if no result found
+    }
+    
+    function handleGradeAssignment($student_id, $subject_id, $grade) {    
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
+        $stmt->bind_param("dii", $grade, $student_id, $subject_id);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }    
+
+    // Fetch student data
+    function getStudentData($student_id) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $student_data = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+
+        return $student_data;
+    }
+
+    // Fetch attached subjects for a student
+    function getAttachedSubjects($student_id) {
+        $attachedSubjects = [];
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT subjects.subject_code, subjects.subject_name, students_subjects.grade 
+                            FROM subjects 
+                            JOIN students_subjects ON subjects.subject_code = students_subjects.subject_id
+                            WHERE students_subjects.student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $attachedSubjects[] = $row;
+        }
+        $stmt->close();
+        mysqli_close($con);
+
+        return $attachedSubjects;
+    }
+
+    // Fetch available subjects for a student
+    function getAvailableSubjects($student_id) {
+        $availableSubjects = [];
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $availableSubjects[] = $row;
+        }
+        $stmt->close();
+        mysqli_close($con);
+
+        return $availableSubjects;
+    }
+
+    // Attach selected subjects to a student
+    function attachSubjectsToStudent($student_id, $subject_codes) {
+        $con = getDatabaseConnection();
+        foreach ($subject_codes as $subject_code) {
+            $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+            $stmt->bind_param("i", $subject_code);
+            $stmt->execute();
+            $subject_data = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            if ($subject_data) {
+                // Insert new subjects with default grade of 0
+                $stmt = $con->prepare("INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, 0)");
+                $stmt->bind_param("ii", $student_id, $subject_code);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        mysqli_close($con);
+    }
+
 ?>

@@ -17,16 +17,8 @@
 
     if (isset($_GET['student_id'])) {
         $student_id = $_GET['student_id'];
-        
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
-        $stmt->bind_param("i", $student_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $student_data = $result->fetch_assoc();
-        $stmt->close();
-        mysqli_close($con);
-        
+
+        $student_data = getStudentData($student_id);
         if ($student_data) {
             $first_name = $student_data['first_name'];
             $last_name = $student_data['last_name'];
@@ -49,53 +41,13 @@
 
         if (empty($arrErrors)) {
             if (isset($subject_codes) && !empty($subject_codes)) {
-                $con = getDatabaseConnection();
-                foreach ($subject_codes as $subject_code) {
-                    $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
-                    $stmt->bind_param("i", $subject_code); // Use subject_code
-                    $stmt->execute();
-                    $subject_data = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
-
-                    if ($subject_data) {
-                        // Insert new subjects with default grade of 0, using subject_code
-                        $stmt = $con->prepare("INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, 0)");
-                        $stmt->bind_param("ii", $student_id, $subject_code); // Use student_id as string and subject_code as string
-                        $stmt->execute();
-                        $stmt->close();
-                    }
-                }
-                mysqli_close($con);
+                attachSubjectsToStudent($student_id, $subject_codes);
             }
         }
     }
 
-    $attachedSubjects = [];
-    $con = getDatabaseConnection();
-    $stmt = $con->prepare("SELECT subjects.subject_code, subjects.subject_name, students_subjects.grade 
-                           FROM subjects 
-                           JOIN students_subjects ON subjects.subject_code = students_subjects.subject_id
-                           WHERE students_subjects.student_id = ?");
-    $stmt->bind_param("i", $student_id); // Use student_id as string
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $attachedSubjects[] = $row;
-    }
-    $stmt->close();
-    mysqli_close($con);
-
-    $availableSubjects = [];
-    $con = getDatabaseConnection();
-    $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
-    $stmt->bind_param("i", $student_id); 
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $availableSubjects[] = $row;
-    }
-    $stmt->close();
-    mysqli_close($con);
+    $attachedSubjects = getAttachedSubjects($student_id);
+    $availableSubjects = getAvailableSubjects($student_id);
 ?>
 
 <main class="container justify-content-between align-items-center col-8 mt-4">
