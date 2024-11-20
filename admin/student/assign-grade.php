@@ -5,7 +5,7 @@
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
 
     require '../../functions.php';
-    guard();  // Ensure the user is logged in
+    guard();
 
     $pathDashboard = "../dashboard.php";
     $pathLogout = "../logout.php";
@@ -15,11 +15,13 @@
     require '../partials/header.php';
     require '../partials/side-bar.php';
 
-    if (isset($_POST['student_id']) && isset($_POST['subject_id'])) {
+    $arrErrors = [];
+
+    // Validate the presence of student_id and subject_id
+    if (isset($_POST['student_id'], $_POST['subject_id'])) {
         $student_id = (int)$_POST['student_id'];
         $subject_id = (int)$_POST['subject_id'];
 
-        // Get student and subject details
         $studentSubjectDetails = getStudentSubjectDetails($student_id, $subject_id);
 
         if ($studentSubjectDetails) {
@@ -28,47 +30,45 @@
             $subject_name = $studentSubjectDetails['subject_name'];
             $grade = $studentSubjectDetails['grade'];
         } else {
-            header("Location: register.php");
-            exit;
+            redirectTo($pathStudents);
         }
     } else {
-        header("Location: register.php");
-        exit;
+        redirectTo($pathStudents);
     }
 
     // Handle form submission for grade assignment
-    if (isset($_POST['btnAssignGrade']) && isset($_POST['txtGrade'])) {
+    if (isset($_POST['btnAssignGrade'], $_POST['txtGrade'])) {
         $grade = $_POST['txtGrade'];
         $arrErrors = validateGrade($grade);
 
         if (empty($arrErrors)) {
             handleGradeAssignment($student_id, $subject_id, $grade);
-            header("Location: attach-subject.php?student_id=" . $student_id);
-            exit;
+            redirectTo("attach-subject.php?student_id=" . $student_id);
         }
     }
 
     // Handle cancellation
     if (isset($_POST['btnCancel'])) {
-        header("Location: attach-subject.php?student_id=" . $student_id);
-        exit;
+        redirectTo("attach-subject.php?student_id=" . $student_id);
     }
 ?>
 
-<main class="container justify-content-between align-items-center col-8 mt-4">
+<main class="container col-8 mt-4">
     <h2 class="mt-4">Assign Grade to Subject</h2>
     <div class="mt-5 mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="../dashboard.php" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="register.php" class="text-decoration-none">Register Student</a></li>
-                <li class="breadcrumb-item"><a href="attach-subject.php?student_id=<?= htmlspecialchars($student_id); ?>" class="text-decoration-none">Attach Subject to Student</a></li>
+                <li class="breadcrumb-item">
+                    <a href="attach-subject.php?student_id=<?= htmlspecialchars($student_id); ?>" class="text-decoration-none">Attach Subject to Student</a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">Assign Grade to Subject</li>
             </ol>
         </nav>
     </div>
 
-    <?php if (!empty($arrErrors)): ?>
+    <?php if ($arrErrors): ?>
         <?= displayErrors($arrErrors); ?>
     <?php endif; ?>
 
@@ -98,7 +98,6 @@
             <button name="btnAssignGrade" type="submit" class="btn btn-primary">Assign Grade</button>
         </div>
     </form>
-
 </main>
 
 <?php require '../partials/footer.php'; ?>

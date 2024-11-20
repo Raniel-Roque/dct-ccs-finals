@@ -333,4 +333,31 @@
         mysqli_close($con);
     }
 
+    // Delete student and their assigned subjects
+    function deleteStudentAndSubjects($student_id) {
+        // Get database connection
+        $con = getDatabaseConnection();
+
+        // Delete associated student-subject relationships first
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Now, delete the student record
+        $stmt = $con->prepare("DELETE FROM students WHERE student_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Close the database connection
+        mysqli_close($con);
+    }
+
+
+    // Redirect to a given page
+    function redirectTo($url) {
+        header("Location: " . $url);
+        exit;
+    }
 ?>

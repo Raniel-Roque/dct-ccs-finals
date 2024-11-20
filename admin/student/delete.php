@@ -1,4 +1,4 @@
-<?php
+<?php   
     ob_start();
     session_start();
     $title = 'Delete Student';
@@ -17,40 +17,23 @@
 
     if (isset($_POST['student_id'])) {
         $student_id = $_POST['student_id'];
-
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
-        $stmt->bind_param("s", $student_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $student = $result->fetch_assoc();
-        $stmt->close();
-        mysqli_close($con);
+        $student = getStudentData($student_id);
 
         if (!$student) {
-            header("Location: register.php");
-            exit;
+            redirectTo("register.php");
         }
     } else {
-        header("Location: register.php");
-        exit;
+        redirectTo("register.php");
     }
 
+    // Delete student and related subjects on confirmation
     if (isset($_POST['btnConfirmDelete'])) {
-        $con = getDatabaseConnection();
-        $stmt = $con->prepare("DELETE FROM students WHERE student_id = ?");
-        $stmt->bind_param("s", $student_id);
-        $stmt->execute();
-        $stmt->close();
-        mysqli_close($con);
-
-        header("Location: register.php");
-        exit;
+        deleteStudentAndSubjects($student_id);
+        redirectTo("register.php");
     }
 
     if (isset($_POST['btnCancel'])) {
-        header("Location: register.php");
-        exit;
+        redirectTo("register.php");
     }
 ?>
 
