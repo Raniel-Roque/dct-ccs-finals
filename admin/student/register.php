@@ -114,7 +114,7 @@
 
                                     <form method="GET" action="attach-subject.php" class="d-inline">
                                         <input type="hidden" name="student_id" value="<?= $student['student_id']; ?>">
-                                        <button type="submit" name="btnAttach" class="btn btn-warning btn-sm">Attach Subject</button>
+                                        <button type="submit" class="btn btn-warning btn-sm">Attach Subject</button>
                                     </form>
                                 </td>
                             </tr>
