@@ -144,19 +144,6 @@
         return $arrErrors;
     }
     
-    function getSelectedStudentIndex($student_id) {
-        foreach ($_SESSION['students'] as $index => $student) {
-            if ($student['student_id'] === $student_id) {
-                return $index;
-            }
-        }
-        return null;  // Return null if student is not found
-    }
-
-    function getSelectedStudentData($index) {
-        return isset($_SESSION['students'][$index]) ? $_SESSION['students'][$index] : null;
-    }
-
     // SUBJECT MANAGEMENT
 
     function validateSubjectData($subject_code, $subject_name) {
@@ -214,19 +201,6 @@
         return $arrErrors;
     }    
 
-    function getSelectedSubjectIndex($subject_code) {
-        foreach ($_SESSION['subjects'] as $index => $subject) {
-            if ($subject['subject_code'] === $subject_code) {
-                return $index;
-            }
-        }
-        return null;  // Return null if subject is not found
-    }
-    
-    function getSelectedSubjectData($index) {
-        return isset($_SESSION['subjects'][$index]) ? $_SESSION['subjects'][$index] : null;
-    }    
-    
     function validateAttachedSubject($subject_data) {
         $arrErrors = [];
     
