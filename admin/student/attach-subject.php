@@ -18,11 +18,11 @@
     $arrErrors = [];
 
     if (isset($_GET['student_id'])) {
-        $student_id = $_GET['student_id'];
+        $student_id = sanitize($_GET['student_id']);
         $student_data = getStudentData($student_id);
         
         if ($student_data) {
-            $full_name = $student_data['first_name'] . ' ' . $student_data['last_name'];
+            $full_name = sanitize($student_data['first_name'] . ' ' . $student_data['last_name']);
         } else {
             redirectTo($pathStudents);
         }
@@ -62,8 +62,8 @@
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <h3>Selected Student Information</h3>
         <ul>
-            <li><strong>Student ID:</strong> <?= htmlspecialchars($student_id); ?></li>
-            <li><strong>Name:</strong> <?= htmlspecialchars($full_name); ?></li>
+            <li><strong>Student ID:</strong> <?= sanitize($student_id); ?></li>
+            <li><strong>Name:</strong> <?= sanitize($full_name); ?></li>
         </ul>
 
         <hr>
@@ -71,9 +71,9 @@
         <?php if ($availableSubjects): ?>
             <?php foreach ($availableSubjects as $subject): ?>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="subject_ids[]" value="<?= htmlspecialchars($subject['subject_code']); ?>" id="subject_<?= htmlspecialchars($subject['subject_code']); ?>">
-                    <label class="form-check-label" for="subject_<?= htmlspecialchars($subject['subject_code']); ?>">
-                        <?= htmlspecialchars($subject['subject_code']); ?> - <?= htmlspecialchars($subject['subject_name']); ?>
+                    <input class="form-check-input" type="checkbox" name="subject_ids[]" value="<?= sanitize($subject['subject_code']); ?>" id="subject_<?= sanitize($subject['subject_code']); ?>">
+                    <label class="form-check-label" for="subject_<?= sanitize($subject['subject_code']); ?>">
+                        <?= sanitize($subject['subject_code']); ?> - <?= sanitize($subject['subject_name']); ?>
                     </label>
                 </div>
             <?php endforeach; ?>
@@ -102,18 +102,18 @@
                     <?php if ($attachedSubjects): ?>
                         <?php foreach ($attachedSubjects as $subject): ?>
                             <tr>
-                                <td><?= htmlspecialchars($subject['subject_code']); ?></td>
-                                <td><?= htmlspecialchars($subject['subject_name']); ?></td>
-                                <td><?= $subject['grade'] == 0 ? '--.--' : htmlspecialchars($subject['grade']); ?></td>
+                                <td><?= sanitize($subject['subject_code']); ?></td>
+                                <td><?= sanitize($subject['subject_name']); ?></td>
+                                <td><?= $subject['grade'] == 0 ? '--.--' : sanitize($subject['grade']); ?></td>
                                 <td>
                                     <form method="POST" action="dettach-subject.php" class="d-inline">
-                                        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
-                                        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>">
+                                        <input type="hidden" name="student_id" value="<?= sanitize($student_id); ?>">
+                                        <input type="hidden" name="subject_id" value="<?= sanitize($subject['subject_code']); ?>">
                                         <button type="submit" name="btnDettach" class="btn btn-danger btn-sm">Detach Subject</button>
                                     </form>
                                     <form method="POST" action="assign-grade.php" class="d-inline">
-                                        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
-                                        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>"> 
+                                        <input type="hidden" name="student_id" value="<?= sanitize($student_id); ?>">
+                                        <input type="hidden" name="subject_id" value="<?= sanitize($subject['subject_code']); ?>"> 
                                         <button type="submit" name="btnAssignGrade" class="btn btn-success btn-sm">Assign Grade</button>
                                     </form>
                                 </td>

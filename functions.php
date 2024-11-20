@@ -399,4 +399,8 @@
         header("Location: " . $url);
         exit;
     }
+
+    function sanitize($data) {
+        return htmlspecialchars(stripslashes(trim($data)));
+    }    
 ?>

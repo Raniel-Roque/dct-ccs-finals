@@ -16,7 +16,7 @@
     require '../partials/side-bar.php';
 
     if (isset($_POST['student_id'])) {
-        $student_id = $_POST['student_id'];
+        $student_id = sanitize($_POST['student_id']);
         $student = getStudentData($student_id);
 
         if (!$student) {
@@ -53,12 +53,12 @@
         <p>Are you sure you want to delete the following student record?</p>
 
         <ul>
-            <li><strong>Student ID:</strong> <?= htmlspecialchars($student['student_id']); ?> </li>
-            <li><strong>First Name:</strong> <?= htmlspecialchars($student['first_name']); ?> </li>
-            <li><strong>Last Name:</strong> <?= htmlspecialchars($student['last_name']); ?> </li>
+            <li><strong>Student ID:</strong> <?= sanitize($student['student_id']); ?> </li>
+            <li><strong>First Name:</strong> <?= sanitize($student['first_name']); ?> </li>
+            <li><strong>Last Name:</strong> <?= sanitize($student['last_name']); ?> </li>
         </ul>
 
-        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student['student_id']); ?>">
+        <input type="hidden" name="student_id" value="<?= sanitize($student['student_id']); ?>">
 
         <div>
             <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>

@@ -16,9 +16,8 @@
     require '../partials/side-bar.php';
 
     if (isset($_POST['student_id'])) {
-        $student_id = $_POST['student_id'];
+        $student_id = sanitize($_POST['student_id']);
 
-        // Get student data from the database
         $student = getStudentData($student_id);
 
         if (!$student) {
@@ -29,8 +28,8 @@
     }
 
     if (isset($_POST['btnUpdate'])) {
-        $first_name = htmlspecialchars(stripslashes(trim($_POST['first_name'])));
-        $last_name = htmlspecialchars(stripslashes(trim($_POST['last_name'])));
+        $first_name = sanitize($_POST['first_name']);
+        $last_name = sanitize($_POST['last_name']);
 
         $arrErrors = validateStudentData($student_id, $first_name, $last_name);
 
@@ -59,17 +58,17 @@
 
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <div class="form-floating mb-3">
-            <input type="number" class="form-control bg-light" id="txtStudentID" name="student_id" value="<?= htmlspecialchars($student['student_id']); ?>" readonly>
+            <input type="number" class="form-control bg-light" id="txtStudentID" name="student_id" value="<?= sanitize($student['student_id']); ?>" readonly>
             <label for="txtStudentID">Student ID</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtFirstName" name="first_name" placeholder="Enter First Name" value="<?= isset($_POST['first_name']) ? htmlspecialchars($_POST['first_name']) : htmlspecialchars($student['first_name']); ?>">
+            <input type="text" class="form-control" id="txtFirstName" name="first_name" placeholder="Enter First Name" value="<?= isset($_POST['first_name']) ? sanitize($_POST['first_name']) : sanitize($student['first_name']); ?>">
             <label for="txtFirstName">First Name</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="txtLastName" name="last_name" placeholder="Enter Last Name" value="<?= isset($_POST['last_name']) ? htmlspecialchars($_POST['last_name']) : htmlspecialchars($student['last_name']); ?>">
+            <input type="text" class="form-control" id="txtLastName" name="last_name" placeholder="Enter Last Name" value="<?= isset($_POST['last_name']) ? sanitize($_POST['last_name']) : sanitize($student['last_name']); ?>">
             <label for="txtLastName">Last Name</label>
         </div>
 
