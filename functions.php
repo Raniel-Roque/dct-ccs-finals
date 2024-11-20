@@ -364,6 +364,50 @@
         mysqli_close($con);
     }    
 
+    function getPassFailCount() {
+        $con = getDatabaseConnection();
+        $passedCount = 0;
+        $failedCount = 0;
+    
+        $students = getAllStudents();
+    
+        foreach ($students as $student) {
+            $student_id = $student['student_id'];
+    
+            $stmt = $con->prepare("SELECT grade FROM students_subjects WHERE student_id = ?");
+            $stmt->bind_param("i", $student_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+    
+            $totalGrade = 0;
+            $subjectCount = 0;
+    
+            while ($row = $result->fetch_assoc()) {
+                $totalGrade += $row['grade'];
+                $subjectCount++;
+            }
+    
+            $stmt->close();
+
+            if ($subjectCount > 0) {
+                $averageGrade = $totalGrade / $subjectCount;
+    
+                if ($averageGrade >= 75) {
+                    $passedCount++;
+                } else {
+                    $failedCount++;
+                }
+            }
+        }
+    
+        mysqli_close($con);
+    
+        return [
+            'passed' => $passedCount,
+            'failed' => $failedCount
+        ];
+    }    
+
     //ATTACH AND DETTACH
     function getStudentSubjectDetails($student_id, $subject_id) {
         $con = getDatabaseConnection();
