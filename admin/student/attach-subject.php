@@ -60,7 +60,7 @@
                     if ($subject_data) {
                         // Insert new subjects with default grade of 0, using subject_code
                         $stmt = $con->prepare("INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, 0)");
-                        $stmt->bind_param("ss", $student_id, $subject_code); // Use student_id as string and subject_code as string
+                        $stmt->bind_param("ii", $student_id, $subject_code); // Use student_id as string and subject_code as string
                         $stmt->execute();
                         $stmt->close();
                     }
@@ -88,7 +88,7 @@
     $availableSubjects = [];
     $con = getDatabaseConnection();
     $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
-    $stmt->bind_param("i", $student_id); // Use student_id as string
+    $stmt->bind_param("i", $student_id); 
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -166,12 +166,13 @@
                                 <td>
                                     <form method="POST" action="dettach-subject.php" class="d-inline">
                                         <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
-                                        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>"> <!-- subject_code here -->
+                                        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>">
                                         <button type="submit" name="btnDettach" class="btn btn-danger btn-sm">Detach Subject</button>
                                     </form>
                                     <form method="POST" action="assign-grade.php" class="d-inline">
                                         <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
                                         <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>"> 
+                                        <input type="hidden" name="grade" value="<?= htmlspecialchars($subject['grade']); ?>"> 
                                         <button type="submit" name="btnAssignGrade" class="btn btn-success btn-sm">Assign Grade</button>
                                     </form>
                                 </td>
