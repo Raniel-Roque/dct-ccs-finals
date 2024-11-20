@@ -25,26 +25,14 @@
         $arrErrors = array_merge($arrErrors, $duplicateErrors);
 
         if (empty($arrErrors)) {
-            $con = getDatabaseConnection();
-            $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $student_id, $first_name, $last_name);
-            $stmt->execute();
-            $stmt->close();
-            mysqli_close($con);
-
+            registerStudent($student_id, $first_name, $last_name);
             $student_id = '';
             $first_name = '';
             $last_name = '';
         }
     }
 
-    $con = getDatabaseConnection();
-    $stmt = $con->prepare("SELECT * FROM students");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $students = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-    mysqli_close($con);
+    $students = getAllStudents();
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">

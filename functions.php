@@ -373,6 +373,27 @@
         mysqli_close($con);
     }    
 
+    function registerStudent($student_id, $first_name, $last_name) {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $student_id, $first_name, $last_name);
+        $stmt->execute();
+        $stmt->close();
+        mysqli_close($con);
+    }
+
+    function getAllStudents() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT * FROM students");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $students = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        mysqli_close($con);
+    
+        return $students;
+    }
+
     // Redirect to a given page
     function redirectTo($url) {
         header("Location: " . $url);
