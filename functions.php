@@ -152,7 +152,7 @@
 
     function getAllStudents() {
         $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM students");
+        $stmt = $con->prepare("SELECT * FROM students ORDER BY student_id ASC");
         $stmt->execute();
         $result = $stmt->get_result();
         $students = $result->fetch_all(MYSQLI_ASSOC);
@@ -273,7 +273,7 @@
 
     function getSubjects() {
         $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM subjects");
+        $stmt = $con->prepare("SELECT * FROM subjects ORDER BY subject_code ASC");
         $stmt->execute();
         $result = $stmt->get_result();
         $subjects = $result->fetch_all(MYSQLI_ASSOC);
@@ -444,7 +444,8 @@
         $stmt = $con->prepare("SELECT subjects.subject_code, subjects.subject_name, students_subjects.grade 
                             FROM subjects 
                             JOIN students_subjects ON subjects.subject_code = students_subjects.subject_id
-                            WHERE students_subjects.student_id = ?");
+                            WHERE students_subjects.student_id = ?
+                            ORDER BY subjects.subject_code ASC");
         $stmt->bind_param("i", $student_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -460,7 +461,7 @@
     function getAvailableSubjects($student_id) {
         $availableSubjects = [];
         $con = getDatabaseConnection();
-        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
+        $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?) ORDER BY subject_code ASC");
         $stmt->bind_param("i", $student_id);
         $stmt->execute();
         $result = $stmt->get_result();
