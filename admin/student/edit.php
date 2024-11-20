@@ -42,7 +42,7 @@
         $last_name = htmlspecialchars(stripslashes(trim($_POST['last_name'])));
 
         $arrErrors = validateStudentData($student_id, $first_name, $last_name);
-        
+
         if (empty($arrErrors)) {
             // Update student information in the database
             $con = getDatabaseConnection();
@@ -76,7 +76,7 @@
 
     <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
         <div class="form-floating mb-3">
-            <input type="text" class="form-control bg-light" id="txtStudentID" name="student_id" value="<?= htmlspecialchars($student['student_id']); ?>" readonly>
+            <input type="number" class="form-control bg-light" id="txtStudentID" name="student_id" value="<?= htmlspecialchars($student['student_id']); ?>" readonly>
             <label for="txtStudentID">Student ID</label>
         </div>
 
