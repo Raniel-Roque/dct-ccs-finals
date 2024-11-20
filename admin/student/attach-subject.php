@@ -43,24 +43,24 @@
     $arrErrors = [];
 
     if (isset($_POST['btnConfirmAttach'])) {
-        $subject_ids = $_POST['subject_ids'] ?? null;
+        $subject_codes = $_POST['subject_ids'] ?? null;
 
-        $arrErrors = validateAttachedSubject($subject_ids);
+        $arrErrors = validateAttachedSubject($subject_codes);
 
         if (empty($arrErrors)) {
-            if (isset($subject_ids) && !empty($subject_ids)) {
+            if (isset($subject_codes) && !empty($subject_codes)) {
                 $con = getDatabaseConnection();
-                foreach ($subject_ids as $subject_id) {
-                    $stmt = $con->prepare("SELECT * FROM subjects WHERE id = ?");
-                    $stmt->bind_param("i", $subject_id); // Change to integer for subject_id
+                foreach ($subject_codes as $subject_code) {
+                    $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+                    $stmt->bind_param("s", $subject_code); // Use subject_code
                     $stmt->execute();
                     $subject_data = $stmt->get_result()->fetch_assoc();
                     $stmt->close();
 
                     if ($subject_data) {
-                        // Insert new subjects with default grade of 0
+                        // Insert new subjects with default grade of 0, using subject_code
                         $stmt = $con->prepare("INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, 0)");
-                        $stmt->bind_param("si", $student_id, $subject_id); // Ensure student_id is string and subject_id is integer
+                        $stmt->bind_param("ss", $student_id, $subject_code); // Use student_id as string and subject_code as string
                         $stmt->execute();
                         $stmt->close();
                     }
@@ -74,7 +74,7 @@
     $con = getDatabaseConnection();
     $stmt = $con->prepare("SELECT subjects.subject_code, subjects.subject_name, students_subjects.grade 
                            FROM subjects 
-                           JOIN students_subjects ON subjects.id = students_subjects.subject_id
+                           JOIN students_subjects ON subjects.subject_code = students_subjects.subject_id
                            WHERE students_subjects.student_id = ?");
     $stmt->bind_param("s", $student_id); // Use student_id as string
     $stmt->execute();
@@ -87,7 +87,7 @@
 
     $availableSubjects = [];
     $con = getDatabaseConnection();
-    $stmt = $con->prepare("SELECT * FROM subjects WHERE id NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
+    $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
     $stmt->bind_param("s", $student_id); // Use student_id as string
     $stmt->execute();
     $result = $stmt->get_result();
@@ -126,8 +126,8 @@
         <?php if (count($availableSubjects) > 0): ?>
             <?php foreach ($availableSubjects as $subject): ?>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="subject_ids[]" value="<?= htmlspecialchars($subject['id']); ?>" id="subject_<?= htmlspecialchars($subject['id']); ?>">
-                    <label class="form-check-label" for="subject_<?= htmlspecialchars($subject['id']); ?>">
+                    <input class="form-check-input" type="checkbox" name="subject_ids[]" value="<?= htmlspecialchars($subject['subject_code']); ?>" id="subject_<?= htmlspecialchars($subject['subject_code']); ?>">
+                    <label class="form-check-label" for="subject_<?= htmlspecialchars($subject['subject_code']); ?>">
                         <?= htmlspecialchars($subject['subject_code']); ?> - <?= htmlspecialchars($subject['subject_name']); ?>
                     </label>
                 </div>
@@ -166,7 +166,7 @@
                                 <td>
                                     <form method="POST" action="dettach-subject.php" class="d-inline">
                                         <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
-                                        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>">
+                                        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>"> <!-- subject_code here -->
                                         <button type="submit" name="btnDettach" class="btn btn-danger btn-sm">Detach Subject</button>
                                     </form>
                                     <form method="POST" action="assign-grade.php" class="d-inline">
