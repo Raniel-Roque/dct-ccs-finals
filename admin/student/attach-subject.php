@@ -1,4 +1,5 @@
 <?php
+    ob_start();
     session_start();
     $title = 'Attach Subject to Student';
     $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
@@ -97,18 +98,16 @@
     mysqli_close($con);
 ?>
 
-<div class="container justify-content-between align-items-center col-8 mt-4">
+<main class="container justify-content-between align-items-center col-8 mt-4">
     <h2 class="mt-4">Attach Subject to Student</h2>
-    <div class="mt-4 w-100">
-        <div class="bg-light p-2 mb-4 border r-4">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="../dashboard.php" class="text-decoration-none">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="register.php" class="text-decoration-none">Register Student</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Attach Subject to Student</li>
-                </ol>
-            </nav>
-        </div>
+    <div class="mt-5 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="../dashboard.php" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="register.php" class="text-decoration-none">Register Student</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Attach Subject to Student</li>
+            </ol>
+        </nav>
     </div>
 
     <?php if (!empty($arrErrors)): ?>
@@ -187,6 +186,6 @@
             </table>
         </div>
     </div>
-</div>
+</main>
 
 <?php require '../partials/footer.php'; ?>
