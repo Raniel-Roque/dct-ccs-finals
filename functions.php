@@ -162,6 +162,18 @@
         return $students;
     }
 
+    function getStudentCount() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT COUNT(*) AS student_count FROM students");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+        
+        return $data['student_count'];
+    }
+
     function registerStudent($student_id, $first_name, $last_name) {
         $con = getDatabaseConnection();
         $stmt = $con->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
@@ -259,7 +271,6 @@
         return $arrErrors;
     }    
 
-    // Fetch all subjects from the database
     function getSubjects() {
         $con = getDatabaseConnection();
         $stmt = $con->prepare("SELECT * FROM subjects");
@@ -282,8 +293,20 @@
         $stmt->close();
         mysqli_close($con);
     
-        return $subject;  // Return the subject details
+        return $subject; 
     }    
+
+    function getSubjectCount() {
+        $con = getDatabaseConnection();
+        $stmt = $con->prepare("SELECT COUNT(*) AS subject_count FROM subjects");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        $stmt->close();
+        mysqli_close($con);
+        
+        return $data['subject_count'];
+    }
 
     function addSubject($subject_code, $subject_name) {
         $con = getDatabaseConnection();
