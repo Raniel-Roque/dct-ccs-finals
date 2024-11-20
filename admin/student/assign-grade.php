@@ -21,9 +21,12 @@
 
         $con = getDatabaseConnection();
 
+        // Query to get student, subject, and grade information
         $stmt = $con->prepare("SELECT students.student_id, 
                                       CONCAT(students.first_name, ' ', students.last_name) AS full_name, 
-                                      subjects.subject_code, subjects.subject_name 
+                                      subjects.subject_code, 
+                                      subjects.subject_name, 
+                                      students_subjects.grade
                                FROM students
                                JOIN students_subjects ON students.student_id = students_subjects.student_id
                                JOIN subjects ON subjects.subject_code = students_subjects.subject_id
@@ -37,6 +40,7 @@
             $full_name = $data['full_name'];
             $subject_code = $data['subject_code'];
             $subject_name = $data['subject_name'];
+            $grade = $data['grade']; // Fetch the grade from the database
         } else {
             header("Location: register.php");
             exit;
@@ -60,6 +64,11 @@
         $stmt->close();
         mysqli_close($con);
 
+        header("Location: attach-subject.php?student_id=" . $student_id);
+        exit;
+    }
+
+    if (isset($_POST['btnCancel'])) {
         header("Location: attach-subject.php?student_id=" . $student_id);
         exit;
     }
@@ -95,7 +104,8 @@
         <hr>
 
         <div class="form-floating mb-3">
-            <input type="number" class="form-control" id="txtGrade" name="txtGrade" placeholder="Grade" value="<?= isset($grade) ? $grade : '0.00' ?>">
+            <input type="number" class="form-control" id="txtGrade" name="txtGrade" placeholder="Grade" 
+                   value="<?= number_format(htmlspecialchars($grade), 2); ?>">
             <label for="txtGrade">Grade</label>
         </div>
 
