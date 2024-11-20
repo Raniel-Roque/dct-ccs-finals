@@ -21,7 +21,6 @@
 
         $con = getDatabaseConnection();
 
-        // Query to get student, subject, and grade information
         $stmt = $con->prepare("SELECT students.student_id, 
                                       CONCAT(students.first_name, ' ', students.last_name) AS full_name, 
                                       subjects.subject_code, 
@@ -54,18 +53,21 @@
     }
 
     if (isset($_POST['btnAssignGrade']) && isset($_POST['txtGrade'])) {
-        $grade = (float)$_POST['txtGrade'];
+        $grade = $_POST['txtGrade'];
+        $arrErrors = validateGrade($grade);
 
-        $con = getDatabaseConnection();
+        if(empty($arrErrors)) {
+            $con = getDatabaseConnection();
 
-        $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
-        $stmt->bind_param("dii", $grade, $student_id, $subject_id);
-        $stmt->execute();
-        $stmt->close();
-        mysqli_close($con);
-
-        header("Location: attach-subject.php?student_id=" . $student_id);
-        exit;
+            $stmt = $con->prepare("UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?");
+            $stmt->bind_param("dii", $grade, $student_id, $subject_id);
+            $stmt->execute();
+            $stmt->close();
+            mysqli_close($con);
+    
+            header("Location: attach-subject.php?student_id=" . $student_id);
+            exit;
+        }
     }
 
     if (isset($_POST['btnCancel'])) {
@@ -105,7 +107,7 @@
 
         <div class="form-floating mb-3">
             <input type="number" class="form-control" id="txtGrade" name="txtGrade" placeholder="Grade" 
-                   value="<?= number_format(htmlspecialchars($grade), 2); ?>">
+                value="<?= isset($_POST['txtGrade']) ? htmlspecialchars($_POST['txtGrade']) : number_format(htmlspecialchars($grade), 2); ?>">
             <label for="txtGrade">Grade</label>
         </div>
 
@@ -117,6 +119,7 @@
             <button name="btnAssignGrade" type="submit" class="btn btn-primary">Assign Grade</button>
         </div>
     </form>
+
 </main>
 
 <?php require '../partials/footer.php'; ?>
