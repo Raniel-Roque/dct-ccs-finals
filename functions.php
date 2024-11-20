@@ -236,4 +236,17 @@
     
         return $arrErrors;
     }    
+
+    //GRADE MANAGEMENT
+    function validateGrade($grade) {
+        $arrErrors = [];
+
+        if(empty($grade)) {
+            $arrErrors[] = "Grade is Required";
+        } else if ($grade < 64 || $grade > 101) {
+            $arrErrors[] = "Grade must be between 65 and 100.";
+        }
+
+        return $arrErrors;
+    }
 ?>
