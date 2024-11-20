@@ -4,8 +4,8 @@
     checkUserSessionIsActive();
 
     if (isset($_POST['login'])) {
-        $email = htmlspecialchars(stripslashes(trim($_POST['email'])));
-        $password = htmlspecialchars(stripslashes(trim($_POST['password'])));
+        $email = sanitize($_POST['email']);
+        $password = sanitize($_POST['password']);
 
         $arrErrors = validateLoginCredentials($email, $password);
 
