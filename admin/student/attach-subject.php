@@ -114,7 +114,6 @@
                                     <form method="POST" action="assign-grade.php" class="d-inline">
                                         <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
                                         <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject['subject_code']); ?>"> 
-                                        <input type="hidden" name="grade" value="<?= htmlspecialchars($subject['grade']); ?>"> 
                                         <button type="submit" name="btnAssignGrade" class="btn btn-success btn-sm">Assign Grade</button>
                                     </form>
                                 </td>
