@@ -20,7 +20,7 @@
         
         $con = getDatabaseConnection();
         $stmt = $con->prepare("SELECT * FROM students WHERE student_id = ?");
-        $stmt->bind_param("s", $student_id);
+        $stmt->bind_param("i", $student_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $student_data = $result->fetch_assoc();
@@ -52,7 +52,7 @@
                 $con = getDatabaseConnection();
                 foreach ($subject_codes as $subject_code) {
                     $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code = ?");
-                    $stmt->bind_param("s", $subject_code); // Use subject_code
+                    $stmt->bind_param("i", $subject_code); // Use subject_code
                     $stmt->execute();
                     $subject_data = $stmt->get_result()->fetch_assoc();
                     $stmt->close();
@@ -76,7 +76,7 @@
                            FROM subjects 
                            JOIN students_subjects ON subjects.subject_code = students_subjects.subject_id
                            WHERE students_subjects.student_id = ?");
-    $stmt->bind_param("s", $student_id); // Use student_id as string
+    $stmt->bind_param("i", $student_id); // Use student_id as string
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -88,7 +88,7 @@
     $availableSubjects = [];
     $con = getDatabaseConnection();
     $stmt = $con->prepare("SELECT * FROM subjects WHERE subject_code NOT IN (SELECT subject_id FROM students_subjects WHERE student_id = ?)");
-    $stmt->bind_param("s", $student_id); // Use student_id as string
+    $stmt->bind_param("i", $student_id); // Use student_id as string
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
