@@ -306,7 +306,7 @@
     function deleteSubjectByCode($subject_code) {
         $con = getDatabaseConnection();
     
-        $stmt = $con->prepare("DELETE FROM students_subjects WHERE subject_code = ?");
+        $stmt = $con->prepare("DELETE FROM students_subjects WHERE subject_id = ?");
         $stmt->bind_param("s", $subject_code);
         $stmt->execute();
         $stmt->close();
