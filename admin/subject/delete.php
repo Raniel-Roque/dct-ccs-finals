@@ -18,7 +18,7 @@
     if (isset($_POST['subject_code'])) {
         $subject_code = $_POST['subject_code'];
         $subject = getSubjectByCode($subject_code);
-        
+
         if (!$subject) {
             redirectTo('add.php');
         }
@@ -27,7 +27,6 @@
     }
 
     if (isset($_POST['btnConfirmDelete'])) {
-        deleteStudentSubjectAssignments($subject_code);
         deleteSubjectByCode($subject_code);
         redirectTo('add.php');
     }
