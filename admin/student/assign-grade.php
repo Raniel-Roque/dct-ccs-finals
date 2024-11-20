@@ -33,6 +33,29 @@
         <?= displayErrors($arrErrors); ?>
     <?php endif; ?>
 
+    <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
+        <h3>Selected Student and Subject Information</h3>
+
+        <ul>
+            <li><strong>Student ID:</strong> <?= htmlspecialchars($student_id); ?></li>
+            <li><strong>Name:</strong> <?= htmlspecialchars($first_name); ?></li>
+            <li><strong>Subject Code:</strong> <?= htmlspecialchars($subject_code); ?></li>
+            <li><strong>Subject Name:</strong> <?= htmlspecialchars($subject_name); ?></li>
+        </ul>
+
+        <div class="form-floating mb-3">
+            <input type="number" class="form-control" id="txtGrade" name="txtGrade" placeholder="Grade" value="<?= isset($subject_code) ? $subject_code : '0.00' ?>">
+            <label for="txtGrade">Grade</label>
+        </div>
+
+        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id); ?>">
+        <input type="hidden" name="subject_id" value="<?= htmlspecialchars($subject_id); ?>">
+
+        <div>
+            <button name="btnCancel" type="submit" class="btn btn-secondary">Cancel</button>
+            <button name="btnAssignGrade" type="submit" class="btn btn-primary">Assign Grade to Subject</button>
+        </div>
+    </form>
 </main>
 
 <?php require '../partials/footer.php'; ?>
